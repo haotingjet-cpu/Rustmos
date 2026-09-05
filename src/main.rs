@@ -2,8 +2,9 @@ use eframe::egui;
 use std::sync::Arc;
 mod ui;
 
-pub(crate) struct Context {
-    functions: ui::InputBox,
+pub(crate) struct Context<'a> {
+    functions: Vec<ui::InputBox<'a>>,
+    pub(crate) deleted_func: Vec<usize>,
     is_colsed: bool,
 }
 
@@ -25,16 +26,30 @@ fn main() -> eframe::Result<()> {
     )
 }
 
-impl Default for Context {
+impl<'a> Default for Context<'a> {
     fn default() -> Self {
         Self {
-            functions: ui::InputBox::new(1),
+            functions: vec![
+                ui::InputBox::new("abc54"),
+                ui::InputBox::new("ab65s"),
+                ui::InputBox::new("6fgde"),
+                ui::InputBox::new("6fgde"),
+                ui::InputBox::new("6fgde"),
+                ui::InputBox::new("6fgde"),
+                ui::InputBox::new("6fgde"),
+                ui::InputBox::new("6fgde"),
+                ui::InputBox::new("6fgde"),
+                ui::InputBox::new("6fgde"),
+                ui::InputBox::new("6fgde"),
+                ui::InputBox::new("6fgde"),
+            ],
+            deleted_func: vec![],
             is_colsed: false,
         }
     }
 }
 
-impl eframe::App for Context {
+impl<'a> eframe::App for Context<'a> {
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         ui::create_left_bar(self, ui, frame);
         // 2. 主畫面

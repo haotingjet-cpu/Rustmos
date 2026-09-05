@@ -1,11 +1,11 @@
 use eframe::egui;
 
-impl super::InputBox {
-    pub(crate) fn new(id: u32) -> Self {
+impl<'a> super::InputBox<'a> {
+    pub(crate) fn new(hash: &'a str) -> Self {
         super::InputBox {
             content: String::new(),
             color: egui::Color32::from_rgb(33, 150, 243),
-            id,
+            hash,
         }
     }
 
@@ -21,7 +21,13 @@ impl super::InputBox {
     }
 }
 
-pub(super) fn create_box(obj: &mut super::InputBox, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+pub(super) fn create_box(
+    obj: &mut super::InputBox,
+    ui: &mut egui::Ui,
+    _frame: &mut eframe::Frame,
+    order: usize,
+    delete_fuc: &mut Vec<usize>,
+) {
     egui::Frame::NONE
         .fill(egui::Color32::WHITE) // 輸入區域主要是白色
         .stroke(egui::Stroke::new(
@@ -46,7 +52,7 @@ pub(super) fn create_box(obj: &mut super::InputBox, ui: &mut egui::Ui, _frame: &
 
                         ui.centered_and_justified(|ui| {
                             ui.label(
-                                egui::RichText::new(format!("{}", obj.id))
+                                egui::RichText::new(format!("{}", order + 1))
                                     .color(egui::Color32::WHITE)
                                     .strong()
                                     .size(13.0),
@@ -87,31 +93,31 @@ pub(super) fn create_box(obj: &mut super::InputBox, ui: &mut egui::Ui, _frame: &
                 ui.add_sized([text_edit_width, total_height], text_edit);
 
                 // 4. 右側灰色「✕」清除按鈕
-                if !obj.content.is_empty() {
-                    let btn_style = ui.style_mut();
-                    btn_style.visuals.widgets.inactive.bg_fill = egui::Color32::TRANSPARENT;
-                    btn_style.visuals.widgets.hovered.bg_fill = egui::Color32::from_white_alpha(10);
-                    btn_style.visuals.widgets.active.bg_fill = egui::Color32::from_white_alpha(20);
+                // if !obj.content.is_empty() {
+                let btn_style = ui.style_mut();
+                btn_style.visuals.widgets.inactive.bg_fill = egui::Color32::TRANSPARENT;
+                btn_style.visuals.widgets.hovered.bg_fill = egui::Color32::from_white_alpha(10);
+                btn_style.visuals.widgets.active.bg_fill = egui::Color32::from_white_alpha(20);
 
-                    btn_style.visuals.widgets.inactive.bg_stroke = egui::Stroke::NONE;
-                    btn_style.visuals.widgets.hovered.bg_stroke = egui::Stroke::NONE;
-                    btn_style.visuals.widgets.active.bg_stroke = egui::Stroke::NONE;
+                btn_style.visuals.widgets.inactive.bg_stroke = egui::Stroke::NONE;
+                btn_style.visuals.widgets.hovered.bg_stroke = egui::Stroke::NONE;
+                btn_style.visuals.widgets.active.bg_stroke = egui::Stroke::NONE;
 
-                    let close_button = egui::Button::new(
-                        egui::RichText::new("X")
-                            .color(egui::Color32::from_rgb(180, 180, 180))
-                            .size(16.0),
-                    );
+                let close_button = egui::Button::new(
+                    egui::RichText::new("X")
+                        .color(egui::Color32::from_rgb(180, 180, 180))
+                        .size(16.0),
+                );
 
-                    if ui
-                        .add_sized([button_width, total_height], close_button)
-                        .clicked()
-                    {
-                        obj.content.clear();
-                    }
-                } else {
-                    ui.allocate_space(egui::vec2(button_width, total_height));
+                if ui
+                    .add_sized([button_width, total_height], close_button)
+                    .clicked()
+                {
+                    delete_fuc.push(order);
                 }
+                // } else {
+                //     ui.allocate_space(egui::vec2(button_width, total_height));
+                // }
             });
         });
 }
