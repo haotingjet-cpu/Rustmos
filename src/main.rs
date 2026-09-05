@@ -2,8 +2,8 @@ use eframe::egui;
 use std::sync::Arc;
 mod ui;
 
-pub(crate) struct Content {
-    text: String,
+pub(crate) struct Context {
+    functions: ui::InputBox,
     is_colsed: bool,
 }
 
@@ -20,23 +20,23 @@ fn main() -> eframe::Result<()> {
         options,
         Box::new(|cc| {
             setup_fonts(&cc.egui_ctx);
-            Ok(Box::new(Content::default()))
+            Ok(Box::new(Context::default()))
         }),
     )
 }
 
-impl Default for Content {
+impl Default for Context {
     fn default() -> Self {
         Self {
-            text: String::new(),
+            functions: ui::InputBox::new(1),
             is_colsed: false,
         }
     }
 }
 
-impl eframe::App for Content {
+impl eframe::App for Context {
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
-        crate::ui::create_left_bar(self, ui, frame);
+        ui::create_left_bar(self, ui, frame);
         // 2. 主畫面
         egui::CentralPanel::default().show(ui, |ui| {
             ui.heading("這是主畫面區域");

@@ -1,6 +1,27 @@
 use eframe::egui;
 
-pub(super) fn create_box(obj: &mut crate::Content, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+impl super::InputBox {
+    pub(crate) fn new(id: u32) -> Self {
+        super::InputBox {
+            content: String::new(),
+            color: egui::Color32::from_rgb(33, 150, 243),
+            id,
+        }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn set_color(&mut self, color: egui::Color32) -> &mut Self {
+        self.color = color;
+        self
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn set_color_from_rgb(&mut self, rgb: [u8; 3]) -> &mut Self {
+        self.set_color(egui::Color32::from_rgb(rgb[0], rgb[1], rgb[2]))
+    }
+}
+
+pub(super) fn create_box(obj: &mut super::InputBox, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
     egui::Frame::NONE
         .fill(egui::Color32::WHITE) // 輸入區域主要是白色
         .stroke(egui::Stroke::new(
@@ -9,7 +30,7 @@ pub(super) fn create_box(obj: &mut crate::Content, ui: &mut egui::Ui, _frame: &m
         )) // 圖片中的深藍色外邊框
         .inner_margin(egui::Margin::ZERO) // 關鍵：外層邊距歸零，讓藍色方塊能貼齊邊框
         .show(ui, |ui| {
-            let total_height = 28.0; // 調整到適合單行輸入的高度
+            let total_height = 40.0; // 調整到適合單行輸入的高度
 
             // 消除水平排列時元件之間的預設間距（Gap），達成無縫拼接
             ui.spacing_mut().item_spacing.x = 0.0;
@@ -17,7 +38,7 @@ pub(super) fn create_box(obj: &mut crate::Content, ui: &mut egui::Ui, _frame: &m
             ui.horizontal(|ui| {
                 // 2. 左側藍色區塊 (1)
                 egui::Frame::NONE
-                    .fill(egui::Color32::from_rgb(33, 150, 243)) // 圖片中的高飽和度藍色
+                    .fill(obj.color) // 圖片中的高飽和度藍色
                     .inner_margin(egui::Margin::symmetric(10, 0)) // 左右內邊距使用 i8 整數
                     .show(ui, |ui| {
                         ui.set_height(total_height);
@@ -25,7 +46,7 @@ pub(super) fn create_box(obj: &mut crate::Content, ui: &mut egui::Ui, _frame: &m
 
                         ui.centered_and_justified(|ui| {
                             ui.label(
-                                egui::RichText::new("1")
+                                egui::RichText::new(format!("{}", obj.id))
                                     .color(egui::Color32::WHITE)
                                     .strong()
                                     .size(13.0),
@@ -59,14 +80,14 @@ pub(super) fn create_box(obj: &mut crate::Content, ui: &mut egui::Ui, _frame: &m
                 text_style.override_font_id = Some(font_id);
 
                 // 建立輸入框
-                let text_edit = egui::TextEdit::singleline(&mut obj.text)
+                let text_edit = egui::TextEdit::singleline(&mut obj.content)
                     .desired_width(text_edit_width)
                     .margin(egui::Margin::symmetric(6, 4));
 
                 ui.add_sized([text_edit_width, total_height], text_edit);
 
                 // 4. 右側灰色「✕」清除按鈕
-                if !obj.text.is_empty() {
+                if !obj.content.is_empty() {
                     let btn_style = ui.style_mut();
                     btn_style.visuals.widgets.inactive.bg_fill = egui::Color32::TRANSPARENT;
                     btn_style.visuals.widgets.hovered.bg_fill = egui::Color32::from_white_alpha(10);
@@ -86,7 +107,7 @@ pub(super) fn create_box(obj: &mut crate::Content, ui: &mut egui::Ui, _frame: &m
                         .add_sized([button_width, total_height], close_button)
                         .clicked()
                     {
-                        obj.text.clear();
+                        obj.content.clear();
                     }
                 } else {
                     ui.allocate_space(egui::vec2(button_width, total_height));

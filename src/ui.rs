@@ -1,12 +1,18 @@
 pub(crate) mod input_box;
 use eframe::egui::{self, Panel};
 
+pub(crate) struct InputBox {
+    pub(crate) content: String,
+    pub(crate) color: egui::Color32,
+    pub(crate) id: u32,
+}
+
 pub(crate) fn create_left_bar(
-    obj: &mut crate::Content,
+    obj: &mut crate::Context,
     ui: &mut egui::Ui,
     frame: &mut eframe::Frame,
 ) {
-    let target_width = if obj.is_colsed { 60.0 } else { 250.0 };
+    let target_width = if obj.is_colsed { 60.0 } else { 400.0 };
 
     // 1. 建立左側欄
     Panel::left("main_sidebar")
@@ -29,13 +35,11 @@ pub(crate) fn create_left_bar(
 
                 // 依據開關狀態顯示選單或圖示
                 if !obj.is_colsed {
-                    ui.label("🏠 首頁項目");
                     ui.label("⚙️ 設定項目");
                 } else {
-                    ui.label("🏠");
                     ui.label("⚙️");
                 }
-                self::input_box::create_box(obj, ui, frame);
+                self::input_box::create_box(&mut obj.functions, ui, frame);
             });
         });
 }
