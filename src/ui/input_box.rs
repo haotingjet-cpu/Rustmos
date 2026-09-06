@@ -1,23 +1,14 @@
 use eframe::egui;
 
+use crate::ui::theam_color::Color;
+
 impl<'a> super::InputBox<'a> {
-    pub(crate) fn new(hash: &'a str) -> Self {
+    pub(crate) fn new(_hash: &'a str) -> Self {
         super::InputBox {
             content: String::new(),
-            color: egui::Color32::from_rgb(33, 150, 243),
-            hash,
+            color: Color::LightBlue,
+            _hash,
         }
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn set_color(&mut self, color: egui::Color32) -> &mut Self {
-        self.color = color;
-        self
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn set_color_from_rgb(&mut self, rgb: [u8; 3]) -> &mut Self {
-        self.set_color(egui::Color32::from_rgb(rgb[0], rgb[1], rgb[2]))
     }
 }
 
@@ -44,7 +35,7 @@ pub(super) fn create_box(
             ui.horizontal(|ui| {
                 // 2. 左側藍色區塊 (1)
                 egui::Frame::NONE
-                    .fill(obj.color) // 圖片中的高飽和度藍色
+                    .fill(obj.color.get()) // 圖片中的高飽和度藍色
                     .inner_margin(egui::Margin::symmetric(10, 0)) // 左右內邊距使用 i8 整數
                     .show(ui, |ui| {
                         ui.set_height(total_height);
@@ -103,11 +94,8 @@ pub(super) fn create_box(
                 btn_style.visuals.widgets.hovered.bg_stroke = egui::Stroke::NONE;
                 btn_style.visuals.widgets.active.bg_stroke = egui::Stroke::NONE;
 
-                let close_button = egui::Button::new(
-                    egui::RichText::new("X")
-                        .color(egui::Color32::from_rgb(180, 180, 180))
-                        .size(16.0),
-                );
+                let close_button =
+                    egui::Button::new(egui::RichText::new("X").color(Color::Gray.get()).size(16.0));
 
                 if ui
                     .add_sized([button_width, total_height], close_button)

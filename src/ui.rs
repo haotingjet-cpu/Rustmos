@@ -1,10 +1,13 @@
 pub(crate) mod input_box;
+pub(crate) mod theam_color;
+
 use eframe::egui::{self, Panel};
+use theam_color::Color;
 
 pub(crate) struct InputBox<'a> {
     pub(crate) content: String,
-    pub(crate) color: egui::Color32,
-    pub(crate) hash: &'a str,
+    pub(crate) color: theam_color::Color,
+    pub(crate) _hash: &'a str,
 }
 
 pub(crate) fn create_left_bar(
@@ -12,7 +15,7 @@ pub(crate) fn create_left_bar(
     ui: &mut egui::Ui,
     frame: &mut eframe::Frame,
 ) {
-    let target_width = if obj.is_colsed { 60.0 } else { 400.0 };
+    let target_width = if obj.is_colsed { 80.0 } else { 400.0 };
 
     // 1. 建立左側欄
     Panel::left("main_sidebar")
@@ -31,7 +34,11 @@ pub(crate) fn create_left_bar(
                         ui.label("⚙️ 設定項目");
                     }
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        let button_text = if obj.is_colsed { "▶" } else { "◀ 收合" };
+                        let button_text = if obj.is_colsed {
+                            "▶ open"
+                        } else {
+                            "◀ close"
+                        };
                         if ui.button(button_text).clicked() {
                             obj.is_colsed = !obj.is_colsed;
                         }
@@ -49,5 +56,22 @@ pub(crate) fn create_left_bar(
                     self::input_box::create_box(input_box, ui, frame, order, &mut obj.deleted_func);
                 }
             });
+
+            {
+                let button_text = if obj.is_colsed {
+                    "+f "
+                } else {
+                    "add a function"
+                };
+                let close_button = egui::Button::new(
+                    egui::RichText::new(button_text)
+                        .color(Color::Gray.get())
+                        .size(16.0),
+                );
+
+                if ui.add_sized([target_width, 30.0], close_button).clicked() {
+                    obj.functions.push(InputBox::new("4dfer"));
+                }
+            }
         });
 }

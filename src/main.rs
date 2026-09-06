@@ -29,20 +29,7 @@ fn main() -> eframe::Result<()> {
 impl<'a> Default for Context<'a> {
     fn default() -> Self {
         Self {
-            functions: vec![
-                ui::InputBox::new("abc54"),
-                ui::InputBox::new("ab65s"),
-                ui::InputBox::new("6fgde"),
-                ui::InputBox::new("6fgde"),
-                ui::InputBox::new("6fgde"),
-                ui::InputBox::new("6fgde"),
-                ui::InputBox::new("6fgde"),
-                ui::InputBox::new("6fgde"),
-                ui::InputBox::new("6fgde"),
-                ui::InputBox::new("6fgde"),
-                ui::InputBox::new("6fgde"),
-                ui::InputBox::new("6fgde"),
-            ],
+            functions: vec![ui::InputBox::new("abc54")],
             deleted_func: vec![],
             is_colsed: false,
         }
