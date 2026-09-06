@@ -42,7 +42,7 @@ impl<'a> eframe::App for Context<'a> {
         // 2. 主畫面
         egui::CentralPanel::default().show(ui, |ui| {
             ui.heading("這是主畫面區域");
-            ui.label("側邊欄收合時，主畫面會自動往左展開填滿！");
+            ui.label("之後這邊繪畫出座標");
         });
     }
 }

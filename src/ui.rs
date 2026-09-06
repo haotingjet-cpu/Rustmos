@@ -65,7 +65,7 @@ pub(crate) fn create_left_bar(
                 };
                 let close_button = egui::Button::new(
                     egui::RichText::new(button_text)
-                        .color(Color::Gray.get())
+                        .color(Color::DarkGray.get())
                         .size(16.0),
                 );
 
