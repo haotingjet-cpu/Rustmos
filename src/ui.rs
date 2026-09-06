@@ -59,7 +59,7 @@ pub(crate) fn create_left_bar(
 
             {
                 let button_text = if obj.is_colsed {
-                    "+f "
+                    "➕F "
                 } else {
                     "add a function"
                 };
