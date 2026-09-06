@@ -6,7 +6,7 @@ impl<'a> super::InputBox<'a> {
     pub(crate) fn new(_hash: &'a str) -> Self {
         super::InputBox {
             content: String::new(),
-            color: Color::LightBlue,
+            color: Color::Purple,
             _hash,
         }
     }
@@ -21,10 +21,7 @@ pub(super) fn create_box(
 ) {
     egui::Frame::NONE
         .fill(egui::Color32::WHITE) // 輸入區域主要是白色
-        .stroke(egui::Stroke::new(
-            1.0,
-            egui::Color32::from_rgb(25, 118, 210),
-        )) // 圖片中的深藍色外邊框
+        .stroke(egui::Stroke::new(1.0, Color::LightPurple)) // 圖片中的深藍色外邊框
         .inner_margin(egui::Margin::ZERO) // 關鍵：外層邊距歸零，讓藍色方塊能貼齊邊框
         .show(ui, |ui| {
             let total_height = 40.0; // 調整到適合單行輸入的高度
@@ -35,7 +32,7 @@ pub(super) fn create_box(
             ui.horizontal(|ui| {
                 // 2. 左側藍色區塊 (1)
                 egui::Frame::NONE
-                    .fill(obj.color.get()) // 圖片中的高飽和度藍色
+                    .fill(obj.color.into()) // 圖片中的高飽和度藍色
                     .inner_margin(egui::Margin::symmetric(10, 0)) // 左右內邊距使用 i8 整數
                     .show(ui, |ui| {
                         ui.set_height(total_height);
@@ -95,7 +92,7 @@ pub(super) fn create_box(
                 btn_style.visuals.widgets.active.bg_stroke = egui::Stroke::NONE;
 
                 let close_button =
-                    egui::Button::new(egui::RichText::new("X").color(Color::Gray.get()).size(16.0));
+                    egui::Button::new(egui::RichText::new("X").color(Color::Gray).size(16.0));
 
                 if ui
                     .add_sized([button_width, total_height], close_button)
