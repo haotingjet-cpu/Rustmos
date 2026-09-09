@@ -1,6 +1,6 @@
 use eframe::egui;
 
-use crate::ui::theam_color::Color;
+use super::theam_color::Color;
 
 impl<'a> super::InputBox<'a> {
     pub(crate) fn new(_hash: &'a str) -> Self {

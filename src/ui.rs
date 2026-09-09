@@ -11,7 +11,7 @@ pub(crate) struct InputBox<'a> {
 }
 
 pub(crate) fn create_left_bar(
-    obj: &mut crate::Context,
+    obj: &mut crate::MyApp,
     ui: &mut egui::Ui,
     frame: &mut eframe::Frame,
 ) {
