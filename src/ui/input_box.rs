@@ -6,7 +6,7 @@ impl<'a> super::InputBox<'a> {
     pub(crate) fn new(_hash: &'a str) -> Self {
         super::InputBox {
             content: String::new(),
-            color: Color::Purple,
+            color: Color::Blue,
             _hash,
         }
     }
@@ -21,7 +21,7 @@ pub(super) fn create_box(
 ) {
     egui::Frame::NONE
         .fill(egui::Color32::WHITE) // 輸入區域主要是白色
-        .stroke(egui::Stroke::new(1.0, Color::LightPurple)) // 圖片中的深藍色外邊框
+        .stroke(egui::Stroke::new(1.0, Color::LightBlue)) // 圖片中的深藍色外邊框
         .inner_margin(egui::Margin::ZERO) // 關鍵：外層邊距歸零，讓藍色方塊能貼齊邊框
         .show(ui, |ui| {
             let total_height = 40.0; // 調整到適合單行輸入的高度
@@ -81,7 +81,6 @@ pub(super) fn create_box(
                 ui.add_sized([text_edit_width, total_height], text_edit);
 
                 // 4. 右側灰色「✕」清除按鈕
-                // if !obj.content.is_empty() {
                 let btn_style = ui.style_mut();
                 btn_style.visuals.widgets.inactive.bg_fill = egui::Color32::TRANSPARENT;
                 btn_style.visuals.widgets.hovered.bg_fill = egui::Color32::from_white_alpha(10);
@@ -100,9 +99,6 @@ pub(super) fn create_box(
                 {
                     delete_fuc.push(order);
                 }
-                // } else {
-                //     ui.allocate_space(egui::vec2(button_width, total_height));
-                // }
             });
         });
 }

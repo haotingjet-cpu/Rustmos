@@ -39,7 +39,16 @@ pub(crate) fn create_left_bar(
                         } else {
                             "◀ close"
                         };
-                        if ui.button(button_text).clicked() {
+                        let close_button = egui::Button::new(
+                            egui::RichText::new(button_text)
+                                .color(Color::DarkGray)
+                                .size(14.0),
+                        );
+
+                        if ui
+                            .add_sized([target_width / 4.0, 20.0], close_button)
+                            .clicked()
+                        {
                             obj.is_colsed = !obj.is_colsed;
                         }
                     });
@@ -63,13 +72,16 @@ pub(crate) fn create_left_bar(
                 } else {
                     "add a function"
                 };
-                let close_button = egui::Button::new(
+                let add_func_button = egui::Button::new(
                     egui::RichText::new(button_text)
                         .color(Color::DarkGray)
                         .size(16.0),
                 );
 
-                if ui.add_sized([target_width, 30.0], close_button).clicked() {
+                if ui
+                    .add_sized([target_width, 30.0], add_func_button)
+                    .clicked()
+                {
                     obj.functions.push(InputBox::new("4dfer"));
                 }
             }
