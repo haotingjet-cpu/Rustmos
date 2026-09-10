@@ -15,7 +15,11 @@ pub(crate) fn create_left_bar(
     ui: &mut egui::Ui,
     frame: &mut eframe::Frame,
 ) {
-    let target_width = if obj.is_colsed { 80.0 } else { 400.0 };
+    let target_width = if obj.is_colsed {
+        80.0
+    } else {
+        (ui.available_width() * 0.3).max(150.0)
+    };
 
     // 1. 建立左側欄
     Panel::left("main_sidebar")

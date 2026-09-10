@@ -1,4 +1,5 @@
 use eframe::egui;
+use egui::Key;
 use std::sync::Arc;
 use wgpu::util::DeviceExt;
 
@@ -9,13 +10,13 @@ pub(crate) struct MyApp<'a> {
     functions: Vec<ui::InputBox<'a>>,
     pub(crate) deleted_func: Vec<usize>,
     is_colsed: bool,
+    center: [f32; 2],
+    s: f32,
 }
 
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
-            //.with_inner_size([960.0, 640.0])
-            .with_maximized(true),
+        viewport: egui::ViewportBuilder::default().with_maximized(true),
         ..Default::default()
     };
 
@@ -39,15 +40,15 @@ impl<'a> MyApp<'a> {
             source: wgpu::ShaderSource::Wgsl(include_str!("coordinate/shader.wgsl").into()),
         });
 
-        let coordinate = coordinate::Coordinate {
+        let coordinate_uniform_init = coordinate::CoordinateUniform {
             transform: 1.0,
             s: 1.0,
-            _pad: [0; 2],
+            center: [1.0; 2],
         };
 
         let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Coordinate"),
-            contents: bytemuck::cast_slice(&[coordinate]),
+            contents: bytemuck::cast_slice(&[coordinate_uniform_init]),
             usage: wgpu::BufferUsages::VERTEX
                 | wgpu::BufferUsages::COPY_DST
                 | wgpu::BufferUsages::UNIFORM,
@@ -130,6 +131,8 @@ impl<'a> MyApp<'a> {
             functions: Vec::new(),
             deleted_func: Vec::new(),
             is_colsed: false,
+            center: [0.0; 2],
+            s: 1.0,
         }
     }
 }
@@ -139,9 +142,6 @@ impl<'a> eframe::App for MyApp<'a> {
         ui::create_left_bar(self, ui, frame);
         // 2. 主畫面
         egui::CentralPanel::default().show(ui, |ui| {
-            ui.heading("這是主畫面區域");
-            ui.label("之後這邊繪畫出座標");
-
             let (rect, _response) =
                 ui.allocate_exact_size(ui.available_size(), egui::Sense::drag());
 
@@ -149,13 +149,34 @@ impl<'a> eframe::App for MyApp<'a> {
 
             let callback = coordinate::Coordinate {
                 transform: width_px / height_px,
-                s: 1.0,
-                _pad: [0; 2],
+                s: self.s,
+                center: self.center,
             };
 
             ui.painter()
                 .add(egui_wgpu::Callback::new_paint_callback(rect, callback));
         });
+    }
+
+    fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        if ctx.input(|i| i.key_down(Key::ArrowUp)) {
+            self.center[1] += 0.01;
+        }
+        if ctx.input(|i| i.key_down(Key::ArrowDown)) {
+            self.center[1] -= 0.01;
+        }
+        if ctx.input(|i| i.key_down(Key::ArrowLeft)) {
+            self.center[0] -= 0.01;
+        }
+        if ctx.input(|i| i.key_down(Key::ArrowRight)) {
+            self.center[0] += 0.01;
+        }
+        if ctx.input(|i| i.key_down(Key::W)) {
+            self.s *= 1.005;
+        }
+        if ctx.input(|i| i.key_down(Key::S)) {
+            self.s /= 1.005;
+        }
     }
 }
 
