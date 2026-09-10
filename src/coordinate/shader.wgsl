@@ -4,8 +4,21 @@ struct VertexOutput {
     @location(0) color: vec3<f32>,
 };
 
+struct Coordinate {
+    transform: vec2<f32>,
+    s: f32,
+    _pad: u32
+};
+
+@group(0) @binding(0) var<uniform> coordinate: Coordinate;
+
 @vertex
 fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> VertexOutput {
+    let m = mat2x2f(
+        coordinate.s, 0.0,
+        0.0, coordinate.s * coordinate.transform[0] / coordinate.transform[1]
+    );
+
     var out: VertexOutput;
 
     var positions = array<vec2<f32>, 3>(
@@ -20,7 +33,7 @@ fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> VertexOutput {
         vec3<f32>(0.0, 0.0, 1.0)  // 藍
     );
 
-    out.position = vec4<f32>(positions[in_vertex_index], 0.0, 1.0);
+    out.position = vec4<f32>(m * positions[in_vertex_index], 0.0, 1.0);
     out.color = colors[in_vertex_index];
 
     return out;

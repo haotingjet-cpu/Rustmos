@@ -1,7 +1,7 @@
 use eframe::egui;
 use std::sync::Arc;
+use wgpu::util::DeviceExt;
 
-use crate::coordinate::Coordinate;
 mod coordinate;
 mod ui;
 
@@ -39,9 +39,46 @@ impl<'a> MyApp<'a> {
             source: wgpu::ShaderSource::Wgsl(include_str!("coordinate/shader.wgsl").into()),
         });
 
+        let coordinate = coordinate::Coordinate {
+            transform: [1.0, 1.0],
+            s: 1.0,
+            _pad: [0],
+        };
+
+        let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Coordinate"),
+            contents: bytemuck::cast_slice(&[coordinate]),
+            usage: wgpu::BufferUsages::VERTEX
+                | wgpu::BufferUsages::COPY_DST
+                | wgpu::BufferUsages::UNIFORM,
+        });
+
+        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("bind group layout"),
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+        });
+
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("time_bind_group"),
+            layout: &bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: uniform_buffer.as_entire_binding(), // 綁定剛剛的緩衝區
+            }],
+        });
+
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("axes_pipeline_layout"),
-            bind_group_layouts: &[],
+            bind_group_layouts: &[Some(&bind_group_layout)],
             immediate_size: 0,
         });
 
@@ -64,7 +101,7 @@ impl<'a> MyApp<'a> {
                 topology: wgpu::PrimitiveTopology::TriangleList,
                 strip_index_format: None,
                 front_face: wgpu::FrontFace::Ccw,
-                cull_mode: Some(wgpu::Face::Back),
+                cull_mode: None, //Some(wgpu::Face::Back),
                 polygon_mode: wgpu::PolygonMode::Fill,
                 unclipped_depth: false,
                 conservative: false,
@@ -83,7 +120,11 @@ impl<'a> MyApp<'a> {
             .renderer
             .write()
             .callback_resources
-            .insert(coordinate::MyRenderResources { pipeline });
+            .insert(coordinate::MyRenderResources {
+                pipeline,
+                bind_group,
+                uniform_buffer,
+            });
 
         Self {
             functions: Vec::new(),
@@ -97,15 +138,19 @@ impl<'a> eframe::App for MyApp<'a> {
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         ui::create_left_bar(self, ui, frame);
         // 2. 主畫面
-        let main_surface = egui::CentralPanel::default().show(ui, |ui| {
+        egui::CentralPanel::default().show(ui, |ui| {
             ui.heading("這是主畫面區域");
             ui.label("之後這邊繪畫出座標");
 
             let (rect, _response) =
                 ui.allocate_exact_size(ui.available_size(), egui::Sense::drag());
 
+            let (width_px, height_px) = (rect.width(), rect.height());
+
             let callback = coordinate::Coordinate {
-                transform: [[0.0, 0.0], [0.0, 0.0]],
+                transform: [width_px, height_px],
+                s: 0.5,
+                _pad: [0],
             };
 
             ui.painter()

@@ -1,24 +1,32 @@
 use eframe::egui;
 
-#[derive(Debug, Clone)]
+#[repr(C)]
+#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub(crate) struct Coordinate {
-    pub(crate) transform: [[f32; 2]; 2],
+    pub(crate) transform: [f32; 2],
+    pub(crate) s: f32,
+    pub(crate) _pad: [u32; 1],
 }
 
 pub(crate) struct MyRenderResources {
     pub(crate) pipeline: wgpu::RenderPipeline,
+    pub(crate) uniform_buffer: wgpu::Buffer,
+    pub(crate) bind_group: wgpu::BindGroup,
 }
 
 impl egui_wgpu::CallbackTrait for Coordinate {
     fn prepare(
         &self,
         _device: &wgpu::Device,
-        _queue: &wgpu::Queue,
+        queue: &wgpu::Queue,
         _screen_descriptor: &egui_wgpu::ScreenDescriptor,
         _egui_encoder: &mut wgpu::CommandEncoder,
         callback_resources: &mut egui_wgpu::CallbackResources,
     ) -> Vec<wgpu::CommandBuffer> {
-        let _resources: &MyRenderResources = callback_resources.get().unwrap();
+        let resources: &MyRenderResources = callback_resources.get().unwrap();
+
+        queue.write_buffer(&resources.uniform_buffer, 0, bytemuck::cast_slice(&[*self]));
+
         Vec::new()
     }
 
@@ -29,6 +37,8 @@ impl egui_wgpu::CallbackTrait for Coordinate {
         callback_resources: &egui_wgpu::CallbackResources,
     ) {
         let resources: &MyRenderResources = callback_resources.get().unwrap();
+
+        render_pass.set_bind_group(0, &resources.bind_group, &[]);
 
         render_pass.set_pipeline(&resources.pipeline);
 
