@@ -5,9 +5,9 @@ struct VertexOutput {
 };
 
 struct Coordinate {
-    transform: vec2<f32>,
+    transform: f32,
     s: f32,
-    _pad: u32
+    _pad: vec2<u32>
 };
 
 @group(0) @binding(0) var<uniform> coordinate: Coordinate;
@@ -15,8 +15,8 @@ struct Coordinate {
 @vertex
 fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> VertexOutput {
     let m = mat2x2f(
-        coordinate.s, 0.0,
-        0.0, coordinate.s * coordinate.transform[0] / coordinate.transform[1]
+        coordinate.s , 0.0,
+        0.0, coordinate.s * coordinate.transform
     );
 
     var out: VertexOutput;

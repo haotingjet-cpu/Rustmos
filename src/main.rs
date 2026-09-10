@@ -40,9 +40,9 @@ impl<'a> MyApp<'a> {
         });
 
         let coordinate = coordinate::Coordinate {
-            transform: [1.0, 1.0],
+            transform: 1.0,
             s: 1.0,
-            _pad: [0],
+            _pad: [0; 2],
         };
 
         let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -148,9 +148,9 @@ impl<'a> eframe::App for MyApp<'a> {
             let (width_px, height_px) = (rect.width(), rect.height());
 
             let callback = coordinate::Coordinate {
-                transform: [width_px, height_px],
-                s: 0.5,
-                _pad: [0],
+                transform: width_px / height_px,
+                s: 1.0,
+                _pad: [0; 2],
             };
 
             ui.painter()

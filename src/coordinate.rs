@@ -1,11 +1,12 @@
 use eframe::egui;
 
+/// transform: width / height
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub(crate) struct Coordinate {
-    pub(crate) transform: [f32; 2],
+    pub(crate) transform: f32,
     pub(crate) s: f32,
-    pub(crate) _pad: [u32; 1],
+    pub(crate) _pad: [u32; 2],
 }
 
 pub(crate) struct MyRenderResources {
