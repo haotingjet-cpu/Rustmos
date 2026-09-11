@@ -41,7 +41,7 @@ fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> VertexOutput {
         vec2<f32>( -1.0,  0.001) + center_y,
         );
 
-    var colors = vec3<f32>(0.0, 0.0, 0.0);
+    var colors = vec3<f32>(1.0, 0.0, 0.0);
 
     out.position = vec4<f32>(positions[in_vertex_index] , 0.0, 1.0);
     out.color = colors;
