@@ -41,14 +41,14 @@ impl<'a> MyApp<'a> {
             &mut *wgpu_state.renderer.write(),
         );
 
-        wgpu_state.renderer.write().callback_resources.insert(
-            coordinate::render_sources::MyRenderResources {
-                target_width: 400,
-                target_height: 400,
-                s: 1.0,
-                center: [0.0; 2],
-            },
-        );
+        // wgpu_state.renderer.write().callback_resources.insert(
+        //     coordinate::render_sources::MyRenderResources {
+        //         target_width: 400,
+        //         target_height: 400,
+        //         s: 1.0,
+        //         center: [0.0; 2],
+        //     },
+        // );
 
         Self {
             functions: Vec::new(),
@@ -75,22 +75,14 @@ impl<'a> eframe::App for MyApp<'a> {
             let w = (rect.width() * pixels_per_point).round() as u32;
             let h = (rect.height() * pixels_per_point).round() as u32;
 
-            ui.ctx().data_mut(|d| {
-                d.insert_temp(
-                    egui::Id::new("offscreen_dimensions"), // 給予一個唯一的 ID
-                    coordinate::render_sources::MyRenderResources {
-                        target_width: w,
-                        target_height: h,
-                        s: 1.0,
-                        center: self.center,
-                    },
-                );
-            });
-
             ui.painter().add(egui_wgpu::Callback::new_paint_callback(
                 rect,
                 coordinate::call_back::MyCallback {
                     renderer: self.offscreen_renderer.clone(),
+                    target_width: w,
+                    target_height: h,
+                    s: 1.0,
+                    center: self.center,
                 },
             ));
 
