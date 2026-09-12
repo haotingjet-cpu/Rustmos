@@ -97,7 +97,6 @@ impl<'a> eframe::App for MyApp<'a> {
 
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if ctx.input(|i| i.key_down(Key::ArrowUp)) {
-            println!("up");
             self.center[1] += 0.01;
         }
         if ctx.input(|i| i.key_down(Key::ArrowDown)) {
