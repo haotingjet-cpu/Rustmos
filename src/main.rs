@@ -41,15 +41,6 @@ impl<'a> MyApp<'a> {
             &mut *wgpu_state.renderer.write(),
         );
 
-        // wgpu_state.renderer.write().callback_resources.insert(
-        //     coordinate::render_sources::MyRenderResources {
-        //         target_width: 400,
-        //         target_height: 400,
-        //         s: 1.0,
-        //         center: [0.0; 2],
-        //     },
-        // );
-
         Self {
             functions: Vec::new(),
             deleted_func: Vec::new(),
