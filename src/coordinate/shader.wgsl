@@ -26,19 +26,19 @@ fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> VertexOutput {
     var center_y = vec2<f32>(0.0,coordinate.center[1]);
 
     var positions = array<vec2<f32>, 12>(
-        vec2<f32>( -0.001,  1.0) + center_x,
-        vec2<f32>(-0.001, -1.0) + center_x,
-        vec2<f32>( 0.001, -1.0) + center_x,
-        vec2<f32>( 0.001,  -1.0) + center_x,
-        vec2<f32>(0.001, 1.0) + center_x,
-        vec2<f32>( -0.001, 1.0) + center_x,
+        vec2<f32>( -0.0008,  1.0) + center_x,
+        vec2<f32>(-0.0008, -1.0) + center_x,
+        vec2<f32>( 0.0008, -1.0) + center_x,
+        vec2<f32>( 0.0008,  -1.0) + center_x,
+        vec2<f32>(0.0008, 1.0) + center_x,
+        vec2<f32>( -0.0008, 1.0) + center_x,
     // ---------------------------------------------
-        vec2<f32>( -1.0,  0.001) + center_y,
-        vec2<f32>( -1.0, -0.001) + center_y,
-        vec2<f32>(  1.0, -0.001) + center_y,
-        vec2<f32>(  1.0, -0.001) + center_y,
-        vec2<f32>(  1.0,  0.001) + center_y,
-        vec2<f32>( -1.0,  0.001) + center_y,
+        vec2<f32>( -1.0,  0.0008) + center_y,
+        vec2<f32>( -1.0, -0.0008) + center_y,
+        vec2<f32>(  1.0, -0.0008) + center_y,
+        vec2<f32>(  1.0, -0.0008) + center_y,
+        vec2<f32>(  1.0,  0.0008) + center_y,
+        vec2<f32>( -1.0,  0.0008) + center_y,
         );
 
     var colors = vec3<f32>(0.0, 0.0, 0.0);

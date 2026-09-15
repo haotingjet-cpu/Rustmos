@@ -4,6 +4,7 @@ use parking_lot::Mutex;
 use std::sync::Arc;
 
 mod coordinate;
+mod equation;
 mod ui;
 
 pub(crate) struct MyApp<'a> {
@@ -87,24 +88,7 @@ impl<'a> eframe::App for MyApp<'a> {
     }
 
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        if ctx.input(|i| i.key_down(Key::ArrowUp)) {
-            self.center[1] += 0.01;
-        }
-        if ctx.input(|i| i.key_down(Key::ArrowDown)) {
-            self.center[1] -= 0.01;
-        }
-        if ctx.input(|i| i.key_down(Key::ArrowLeft)) {
-            self.center[0] -= 0.01;
-        }
-        if ctx.input(|i| i.key_down(Key::ArrowRight)) {
-            self.center[0] += 0.01;
-        }
-        if ctx.input(|i| i.key_down(Key::W)) {
-            self.s *= 1.005;
-        }
-        if ctx.input(|i| i.key_down(Key::S)) {
-            self.s /= 1.005;
-        }
+        self.coordinate_move(ctx);
     }
 }
 
@@ -125,4 +109,27 @@ fn setup_fonts(ctx: &egui::Context) {
         vec.insert(0, "my_chinese_font".to_owned());
     }
     ctx.set_fonts(fonts);
+}
+
+impl<'a> MyApp<'a> {
+    fn coordinate_move(&mut self, ctx: &egui::Context) {
+        if ctx.input(|i| i.key_down(Key::ArrowUp)) {
+            self.center[1] += 0.01;
+        }
+        if ctx.input(|i| i.key_down(Key::ArrowDown)) {
+            self.center[1] -= 0.01;
+        }
+        if ctx.input(|i| i.key_down(Key::ArrowLeft)) {
+            self.center[0] -= 0.01;
+        }
+        if ctx.input(|i| i.key_down(Key::ArrowRight)) {
+            self.center[0] += 0.01;
+        }
+        if ctx.input(|i| i.key_down(Key::W)) {
+            self.s *= 1.005;
+        }
+        if ctx.input(|i| i.key_down(Key::S)) {
+            self.s /= 1.005;
+        }
+    }
 }

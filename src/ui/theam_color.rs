@@ -9,11 +9,15 @@ pub(crate) enum Color {
     DarkGray,
     Purple,
     LightPurple,
+    Red,
+    LightRed,
 }
 
 impl From<Color> for egui::Color32 {
     fn from(color: Color) -> Self {
         match color {
+            Color::Red => egui::Color32::from_rgb(244, 67, 54),
+            Color::LightRed => egui::Color32::from_rgb(255, 205, 210),
             Color::Blue => egui::Color32::from_rgb(33, 150, 243),
             Color::Gray => egui::Color32::from_rgb(180, 180, 180),
             Color::DarkGray => egui::Color32::from_rgb(120, 120, 120),
