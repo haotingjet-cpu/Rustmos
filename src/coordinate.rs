@@ -1,4 +1,5 @@
 pub(crate) mod call_back;
+pub(crate) mod draw_wquation;
 pub(crate) mod offscreen_renderer;
 
 /// transform: width / height
