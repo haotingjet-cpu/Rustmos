@@ -5,6 +5,8 @@ const MUL:  u32 = 0x00000003;
 const DIV:  u32 = 0x00000004;
 const LOADX:u32 = 0x00000005;
 
+const WIDTH: f32 = 0.04;
+
 fn unpack_u32_to_4u8(i: u32) -> vec4<u32> {
     let first = (i >> 0u ) & 0xffu;
     let second = (i >> 8u ) & 0xffu;
@@ -37,21 +39,8 @@ struct Coordinate {
 @group(0) @binding(1) var<uniform> input: InputInstruction;
 @group(0) @binding(2) var<storage, read_write> output_vertices: array<Vertex>;
 
-@compute @workgroup_size(64)
-fn vm_main(@builtin(global_invocation_id) id: vec3<u32>)
+fn vm(register: ptr<function, array<vec4<f32>, 8>>, target_x: f32)
 {
-    let thread_id = id.x;
-
-    if (thread_id >= arrayLength(&output_vertices)) {
-        return;
-    }
-
-    // rust 開了 N 個線程
-    let n = 10u;
-    let total_threads = n * 64u;
-    let target_x = (coordinate.min_x * f32(total_threads - thread_id) + coordinate.max_x * f32(thread_id)) / f32(total_threads);
-
-    var register = array<vec4<f32>, 64>();
     for (var i = 0u; i < input.instruction_number; i = i + 1u)
     {
         let array_idx = i / 4u;
@@ -63,42 +52,73 @@ fn vm_main(@builtin(global_invocation_id) id: vec3<u32>)
         switch codes[0u] {
             case LOAD: {
                 let idx = codes[1u];
-                register[idx / 4u][idx % 4u] = input.para[codes[2u]];
+                (*register)[idx / 4u][idx % 4u] = input.para[codes[2u] / 4u][codes[2u] % 4u];
             }
             case LOADX: {
                 let idx = codes[1u];
 
-                register[idx / 4u][idx % 4u] = target_x;
+                (*register)[idx / 4u][idx % 4u] = target_x;
             }
             case ADD: {
                 let idx = codes[1u];
                 let first_idx = codes[2u];
                 let second_idx = codes[3u];
-                register[idx / 4u][idx % 4u] = register[first_idx / 4u][first_idx % 4u] + register[second_idx / 4u][second_idx % 4u];
+                (*register)[idx / 4u][idx % 4u] = (*register)[first_idx / 4u][first_idx % 4u] + (*register)[second_idx / 4u][second_idx % 4u];
             }
             case SUB: {
                 let idx = codes[1u];
                 let first_idx = codes[2u];
                 let second_idx = codes[3u];
-                register[idx / 4u][idx % 4u] = register[first_idx / 4u][first_idx % 4u] - register[second_idx / 4u][second_idx % 4u];
+                (*register)[idx / 4u][idx % 4u] = (*register)[first_idx / 4u][first_idx % 4u] - (*register)[second_idx / 4u][second_idx % 4u];
             }
             case MUL: {
                 let idx = codes[1u];
                 let first_idx = codes[2u];
                 let second_idx = codes[3u];
-                register[idx / 4u][idx % 4u] = register[first_idx / 4u][first_idx % 4u] * register[second_idx / 4u][second_idx % 4u];
+                (*register)[idx / 4u][idx % 4u] = (*register)[first_idx / 4u][first_idx % 4u] * (*register)[second_idx / 4u][second_idx % 4u];
             }
             case DIV: {
                 let idx = codes[1u];
                 let first_idx = codes[2u];
                 let second_idx = codes[3u];
-                register[idx / 4u][idx % 4u] = register[first_idx / 4u][first_idx % 4u] / register[second_idx / 4u][second_idx % 4u];
+                (*register)[idx / 4u][idx % 4u] = (*register)[first_idx / 4u][first_idx % 4u] / (*register)[second_idx / 4u][second_idx % 4u];
             }
 
             default: {}
         }
     }
+}
 
-    output_vertices[thread_id].position = vec4<f32>(target_x,register[0u][0u], 0.0, 1.0);
-    output_vertices[thread_id].color = input.color;
+@compute @workgroup_size(64)
+fn vm_main(@builtin(global_invocation_id) id: vec3<u32>)
+{
+    let thread_id = id.x;
+
+    if ((thread_id * 2u + 1u) >= arrayLength(&output_vertices)) {
+        return;
+    }
+
+    // rust 開了 N 個線程
+    let n = 10u;
+    let total_threads = n * 64u;
+    let target_x = (coordinate.min_x * f32(total_threads - thread_id) + coordinate.max_x * f32(thread_id)) / f32(total_threads);
+
+    var register = array<vec4<f32>, 8>();
+
+    vm(&register, target_x);
+
+    let target_y = register[0u][0u];
+
+    let target_x2 = target_x + 0.0000001 * (coordinate.max_x - coordinate.min_x);
+
+    vm(&register, target_x2);
+
+    let dev = (register[0u][0u] - target_y) / (target_x2 - target_x);
+
+    let c = WIDTH / sqrt(dev * dev + 1.0);
+
+    output_vertices[thread_id * 2u].position = vec4<f32>(target_x - dev * c ,target_y + c, 0.0, 1.0);
+    output_vertices[thread_id * 2u].color = input.color;
+    output_vertices[thread_id * 2u + 1u].position = vec4<f32>(target_x + dev * c ,target_y - c, 0.0, 1.0);
+    output_vertices[thread_id * 2u + 1u].color = input.color;
 }
