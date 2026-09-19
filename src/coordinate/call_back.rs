@@ -54,7 +54,7 @@ impl egui_wgpu::CallbackTrait for MyCallback {
 
             // println!("{:?}", resources.center);
 
-            let coordinate_uniform = super::CoordinateUniform {
+            let coordinate_uniform = super::CoordinateDiscripter {
                 transform: self.target_width as f32 / self.target_height as f32,
                 s: self.s,
                 center: self.center,

@@ -22,7 +22,7 @@ impl OffscreenRenderer {
             source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
         });
 
-        let coordinate_uniform_init = crate::coordinate::CoordinateUniform {
+        let coordinate_uniform_init = crate::coordinate::CoordinateDiscripter {
             transform: 1.0,
             s: 1.0,
             center: [1.0; 2],
