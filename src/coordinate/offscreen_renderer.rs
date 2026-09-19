@@ -16,16 +16,21 @@ pub(crate) struct OffscreenRenderer {
 }
 
 impl OffscreenRenderer {
-    pub(crate) fn new(device: &wgpu::Device, renderer: &mut egui_wgpu::Renderer) -> Self {
+    pub(crate) fn new(
+        device: &wgpu::Device,
+        renderer: &mut egui_wgpu::Renderer,
+        transform: &super::transform::TransformBuffer,
+    ) -> Self {
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("axes_shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
         });
 
         let coordinate_uniform_init = crate::coordinate::CoordinateDiscripter {
-            transform: 1.0,
-            s: 1.0,
-            center: [1.0; 2],
+            min_x: -5.0,
+            max_x: 5.0,
+            min_y: -5.0,
+            max_y: 5.0,
         };
 
         let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -61,7 +66,7 @@ impl OffscreenRenderer {
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("axes_pipeline_layout"),
-            bind_group_layouts: &[Some(&bind_group_layout)],
+            bind_group_layouts: &[Some(&transform.bindgroup_layout), Some(&bind_group_layout)],
             immediate_size: 0,
         });
 
