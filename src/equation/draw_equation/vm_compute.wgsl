@@ -31,8 +31,7 @@ struct Vertex {
 struct Coordinate {
     max_x: f32,
     min_x: f32,
-    _max_y: f32,
-    _min_y: f32
+    _pad: vec2<f32>
 }
 
 @group(0) @binding(0) var<uniform> coordinate: Coordinate;
