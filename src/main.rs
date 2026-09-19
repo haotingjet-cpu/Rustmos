@@ -11,9 +11,9 @@ pub(crate) struct MyApp<'a> {
     functions: Vec<ui::InputBox<'a>>,
     pub(crate) deleted_func: Vec<usize>,
     is_colsed: bool,
-    coordinate_size: coordinate::CoordinateDiscripter,
+    center: [f32; 2],
+    s: f32,
     offscreen_renderer: Arc<Mutex<coordinate::offscreen_renderer::OffscreenRenderer>>,
-    transform_buffer: Arc<Mutex<coordinate::transform::TransformBuffer>>,
 }
 
 fn main() -> eframe::Result<()> {
@@ -37,26 +37,18 @@ impl<'a> MyApp<'a> {
         let wgpu_state = cc.wgpu_render_state.as_ref().expect("");
         let device = &wgpu_state.device;
 
-        let transform_buffer = coordinate::transform::TransformBuffer::new_buffer(device);
-
         let offscreen_renderer = coordinate::offscreen_renderer::OffscreenRenderer::new(
             device,
             &mut *wgpu_state.renderer.write(),
-            &transform_buffer,
         );
 
         Self {
             functions: Vec::new(),
             deleted_func: Vec::new(),
             is_colsed: false,
-            coordinate_size: coordinate::CoordinateDiscripter {
-                min_x: -2.0,
-                max_x: 2.0,
-                min_y: -2.0,
-                max_y: 2.0,
-            },
+            center: [0.0; 2],
+            s: 1.0,
             offscreen_renderer: Arc::new(Mutex::new(offscreen_renderer)),
-            transform_buffer: Arc::new(Mutex::new(transform_buffer)),
         }
     }
 }
@@ -79,10 +71,10 @@ impl<'a> eframe::App for MyApp<'a> {
                 rect,
                 coordinate::call_back::MyCallback {
                     renderer: self.offscreen_renderer.clone(),
-                    transform_buffer: self.transform_buffer.clone(),
                     target_width: w,
                     target_height: h,
-                    coordinate_discripter: self.coordinate_size,
+                    s: 1.0,
+                    center: self.center,
                 },
             ));
 
@@ -122,7 +114,22 @@ fn setup_fonts(ctx: &egui::Context) {
 impl<'a> MyApp<'a> {
     fn coordinate_move(&mut self, ctx: &egui::Context) {
         if ctx.input(|i| i.key_down(Key::ArrowUp)) {
-            //self.center[1] += 0.01;
+            self.center[1] += 0.01;
+        }
+        if ctx.input(|i| i.key_down(Key::ArrowDown)) {
+            self.center[1] -= 0.01;
+        }
+        if ctx.input(|i| i.key_down(Key::ArrowLeft)) {
+            self.center[0] -= 0.01;
+        }
+        if ctx.input(|i| i.key_down(Key::ArrowRight)) {
+            self.center[0] += 0.01;
+        }
+        if ctx.input(|i| i.key_down(Key::W)) {
+            self.s *= 1.005;
+        }
+        if ctx.input(|i| i.key_down(Key::S)) {
+            self.s /= 1.005;
         }
     }
 }

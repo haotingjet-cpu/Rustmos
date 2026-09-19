@@ -10,7 +10,7 @@ struct Coordinate {
     center: vec2<f32>
 };
 
-@group(1) @binding(0) var<uniform> coordinate: Coordinate;
+@group(0) @binding(0) var<uniform> coordinate: Coordinate;
 
 @vertex
 fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> VertexOutput {

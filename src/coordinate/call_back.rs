@@ -4,10 +4,10 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub(crate) struct MyCallback {
     pub(crate) renderer: Arc<Mutex<super::offscreen_renderer::OffscreenRenderer>>,
-    pub(crate) transform_buffer: Arc<Mutex<super::transform::TransformBuffer>>,
     pub target_width: u32,
     pub target_height: u32,
-    pub(crate) coordinate_discripter: super::CoordinateDiscripter,
+    pub(crate) s: f32,
+    pub(crate) center: [f32; 2],
 }
 
 impl egui_wgpu::CallbackTrait for MyCallback {
@@ -23,7 +23,6 @@ impl egui_wgpu::CallbackTrait for MyCallback {
         //     callback_resources.get::<super::render_sources::MyRenderResources>()
         // {
         let mut renderer = self.renderer.lock();
-        let mut transform_buffer_storage = self.transform_buffer.lock();
         if let Some(wgpu_state) = callback_resources.get::<egui_wgpu::RenderState>() {
             let mut egui_renderer = wgpu_state.renderer.write();
 
@@ -55,25 +54,19 @@ impl egui_wgpu::CallbackTrait for MyCallback {
 
             // println!("{:?}", resources.center);
 
-            queue.write_buffer(
-                &renderer.uniform_buffer,
-                0,
-                bytemuck::cast_slice(&[self.coordinate_discripter]),
-            );
-
-            let transform = super::Transform {
+            let coordinate_uniform = super::CoordinateUniform {
                 transform: self.target_width as f32 / self.target_height as f32,
-                _pad: [0; 3],
+                s: self.s,
+                center: self.center,
             };
 
             queue.write_buffer(
-                &transform_buffer_storage.transform_buffer,
+                &renderer.uniform_buffer,
                 0,
-                bytemuck::cast_slice(&[transform]),
+                bytemuck::cast_slice(&[coordinate_uniform]),
             );
 
-            render_pass.set_bind_group(1, &renderer.bind_group, &[]);
-            render_pass.set_bind_group(0, &transform_buffer_storage.bind_group, &[]);
+            render_pass.set_bind_group(0, &renderer.bind_group, &[]);
 
             // 畫出你的 3D 場景（Pipeline 的 count 為 4）
             render_pass.set_pipeline(&renderer.pipeline);
