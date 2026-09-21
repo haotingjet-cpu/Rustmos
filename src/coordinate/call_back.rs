@@ -54,19 +54,15 @@ impl egui_wgpu::CallbackTrait for MyCallback {
 
             // println!("{:?}", resources.center);
 
-            let coordinate_uniform = super::CoordinateUniform {
+            renderer.render_data.coordinate_uniform.data = super::CoordinateUniform {
                 transform: self.target_width as f32 / self.target_height as f32,
                 s: self.s,
                 center: self.center,
             };
 
-            queue.write_buffer(
-                &renderer.uniform_buffer,
-                0,
-                bytemuck::cast_slice(&[coordinate_uniform]),
-            );
+            renderer.render_data.write_data_to_buffer(queue);
 
-            render_pass.set_bind_group(0, &renderer.bind_group, &[]);
+            render_pass.set_bind_group(0, &renderer.render_data.coordinate_uniform.bindgroup, &[]);
 
             // 畫出你的 3D 場景（Pipeline 的 count 為 4）
             render_pass.set_pipeline(&renderer.pipeline);

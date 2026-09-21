@@ -1,11 +1,9 @@
 use eframe::egui;
-use wgpu::util::DeviceExt;
-
 #[allow(dead_code)]
 pub(crate) struct OffscreenRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
-    pub(crate) uniform_buffer: wgpu::Buffer,
-    pub(crate) bind_group: wgpu::BindGroup,
+
+    pub(crate) render_data: super::render_data::RenderData,
 
     pub(crate) msaa_texture_view: wgpu::TextureView,
     pub(crate) resolve_texture: wgpu::Texture,
@@ -22,46 +20,13 @@ impl OffscreenRenderer {
             source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
         });
 
-        let coordinate_uniform_init = crate::coordinate::CoordinateUniform {
-            transform: 1.0,
-            s: 1.0,
-            center: [1.0; 2],
-        };
-
-        let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Coordinate"),
-            contents: bytemuck::cast_slice(&[coordinate_uniform_init]),
-            usage: wgpu::BufferUsages::VERTEX
-                | wgpu::BufferUsages::COPY_DST
-                | wgpu::BufferUsages::UNIFORM,
-        });
-
-        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("bind group layout"),
-            entries: &[wgpu::BindGroupLayoutEntry {
-                binding: 0,
-                visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Uniform,
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
-                },
-                count: None,
-            }],
-        });
-
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("time_bind_group"),
-            layout: &bind_group_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: uniform_buffer.as_entire_binding(), // 綁定剛剛的緩衝區
-            }],
-        });
+        let render_data = super::render_data::RenderData::new(device);
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("axes_pipeline_layout"),
-            bind_group_layouts: &[Some(&bind_group_layout)],
+            bind_group_layouts: &[Some(
+                render_data.coordinate_uniform.get_ref_bindgroup_layout(),
+            )],
             immediate_size: 0,
         });
 
@@ -147,8 +112,7 @@ impl OffscreenRenderer {
 
         Self {
             pipeline,
-            uniform_buffer,
-            bind_group,
+            render_data,
             msaa_texture_view,
             resolve_texture,
             resolve_texture_view,
