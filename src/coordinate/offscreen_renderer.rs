@@ -3,8 +3,6 @@ use eframe::egui;
 pub(crate) struct OffscreenRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
 
-    pub(crate) render_data: super::render_data::RenderData,
-
     pub(crate) msaa_texture_view: wgpu::TextureView,
     pub(crate) resolve_texture: wgpu::Texture,
     pub(crate) resolve_texture_view: wgpu::TextureView,
@@ -14,13 +12,15 @@ pub(crate) struct OffscreenRenderer {
 }
 
 impl OffscreenRenderer {
-    pub(crate) fn new(device: &wgpu::Device, renderer: &mut egui_wgpu::Renderer) -> Self {
+    pub(crate) fn new(
+        device: &wgpu::Device,
+        renderer: &mut egui_wgpu::Renderer,
+        render_data: &super::render_data::RenderData,
+    ) -> Self {
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("axes_shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
         });
-
-        let render_data = super::render_data::RenderData::new(device);
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("axes_pipeline_layout"),
@@ -112,7 +112,6 @@ impl OffscreenRenderer {
 
         Self {
             pipeline,
-            render_data,
             msaa_texture_view,
             resolve_texture,
             resolve_texture_view,

@@ -4,6 +4,7 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub(crate) struct MyCallback {
     pub(crate) renderer: Arc<Mutex<super::offscreen_renderer::OffscreenRenderer>>,
+    pub(crate) render_data: Arc<Mutex<super::render_data::RenderData>>,
     pub target_width: u32,
     pub target_height: u32,
     pub(crate) s: f32,
@@ -19,10 +20,8 @@ impl egui_wgpu::CallbackTrait for MyCallback {
         encoder: &mut wgpu::CommandEncoder,
         callback_resources: &mut egui_wgpu::CallbackResources,
     ) -> Vec<wgpu::CommandBuffer> {
-        // if let Some(resources) =
-        //     callback_resources.get::<super::render_sources::MyRenderResources>()
-        // {
         let mut renderer = self.renderer.lock();
+        let mut render_data = self.render_data.lock();
         if let Some(wgpu_state) = callback_resources.get::<egui_wgpu::RenderState>() {
             let mut egui_renderer = wgpu_state.renderer.write();
 
@@ -54,15 +53,15 @@ impl egui_wgpu::CallbackTrait for MyCallback {
 
             // println!("{:?}", resources.center);
 
-            renderer.render_data.coordinate_uniform.data = super::CoordinateUniform {
+            render_data.coordinate_uniform.data = super::CoordinateUniform {
                 transform: self.target_width as f32 / self.target_height as f32,
                 s: self.s,
                 center: self.center,
             };
 
-            renderer.render_data.write_data_to_buffer(queue);
+            render_data.write_data_to_buffer(queue);
 
-            render_pass.set_bind_group(0, &renderer.render_data.coordinate_uniform.bindgroup, &[]);
+            render_pass.set_bind_group(0, &render_data.coordinate_uniform.bindgroup, &[]);
 
             // 畫出你的 3D 場景（Pipeline 的 count 為 4）
             render_pass.set_pipeline(&renderer.pipeline);

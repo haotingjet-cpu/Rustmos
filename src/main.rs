@@ -14,6 +14,7 @@ pub(crate) struct MyApp<'a> {
     center: [f32; 2],
     s: f32,
     offscreen_renderer: Arc<Mutex<coordinate::offscreen_renderer::OffscreenRenderer>>,
+    render_data: Arc<Mutex<coordinate::render_data::RenderData>>,
 }
 
 fn main() -> eframe::Result<()> {
@@ -37,9 +38,12 @@ impl<'a> MyApp<'a> {
         let wgpu_state = cc.wgpu_render_state.as_ref().expect("");
         let device = &wgpu_state.device;
 
+        let render_data = coordinate::render_data::RenderData::new(device);
+
         let offscreen_renderer = coordinate::offscreen_renderer::OffscreenRenderer::new(
             device,
             &mut *wgpu_state.renderer.write(),
+            &render_data,
         );
 
         Self {
@@ -49,6 +53,7 @@ impl<'a> MyApp<'a> {
             center: [0.0; 2],
             s: 1.0,
             offscreen_renderer: Arc::new(Mutex::new(offscreen_renderer)),
+            render_data: Arc::new(Mutex::new(render_data)),
         }
     }
 }
@@ -71,6 +76,7 @@ impl<'a> eframe::App for MyApp<'a> {
                 rect,
                 coordinate::call_back::MyCallback {
                     renderer: self.offscreen_renderer.clone(),
+                    render_data: self.render_data.clone(),
                     target_width: w,
                     target_height: h,
                     s: 1.0,
