@@ -23,7 +23,7 @@ impl RenderData {
             let coordinate_uniform_init = crate::coordinate::CoordinateUniform {
                 transform: 1.0,
                 s: 1.0,
-                center: [1.0; 2],
+                center: [0.0; 2],
             };
 
             let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {

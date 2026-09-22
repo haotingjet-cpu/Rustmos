@@ -7,8 +7,6 @@ pub(crate) struct MyCallback {
     pub(crate) render_data: Arc<Mutex<super::render_data::RenderData>>,
     pub target_width: u32,
     pub target_height: u32,
-    pub(crate) s: f32,
-    pub(crate) center: [f32; 2],
 }
 
 impl egui_wgpu::CallbackTrait for MyCallback {
@@ -53,11 +51,8 @@ impl egui_wgpu::CallbackTrait for MyCallback {
 
             // println!("{:?}", resources.center);
 
-            render_data.coordinate_uniform.data = super::CoordinateUniform {
-                transform: self.target_width as f32 / self.target_height as f32,
-                s: self.s,
-                center: self.center,
-            };
+            render_data.coordinate_uniform.data.transform =
+                self.target_width as f32 / self.target_height as f32;
 
             render_data.write_data_to_buffer(queue);
 

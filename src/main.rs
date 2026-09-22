@@ -11,8 +11,6 @@ pub(crate) struct MyApp<'a> {
     functions: Vec<ui::InputBox<'a>>,
     pub(crate) deleted_func: Vec<usize>,
     is_colsed: bool,
-    center: [f32; 2],
-    s: f32,
     offscreen_renderer: Arc<Mutex<coordinate::offscreen_renderer::OffscreenRenderer>>,
     render_data: Arc<Mutex<coordinate::render_data::RenderData>>,
 }
@@ -50,8 +48,6 @@ impl<'a> MyApp<'a> {
             functions: Vec::new(),
             deleted_func: Vec::new(),
             is_colsed: false,
-            center: [0.0; 2],
-            s: 1.0,
             offscreen_renderer: Arc::new(Mutex::new(offscreen_renderer)),
             render_data: Arc::new(Mutex::new(render_data)),
         }
@@ -79,8 +75,6 @@ impl<'a> eframe::App for MyApp<'a> {
                     render_data: self.render_data.clone(),
                     target_width: w,
                     target_height: h,
-                    s: 1.0,
-                    center: self.center,
                 },
             ));
 
@@ -119,23 +113,24 @@ fn setup_fonts(ctx: &egui::Context) {
 
 impl<'a> MyApp<'a> {
     fn coordinate_move(&mut self, ctx: &egui::Context) {
+        let mut render_data = self.render_data.lock();
         if ctx.input(|i| i.key_down(Key::ArrowUp)) {
-            self.center[1] += 0.01;
+            render_data.coordinate_uniform.data.center[1] += 0.01;
         }
         if ctx.input(|i| i.key_down(Key::ArrowDown)) {
-            self.center[1] -= 0.01;
+            render_data.coordinate_uniform.data.center[1] -= 0.01;
         }
         if ctx.input(|i| i.key_down(Key::ArrowLeft)) {
-            self.center[0] -= 0.01;
+            render_data.coordinate_uniform.data.center[0] -= 0.01;
         }
         if ctx.input(|i| i.key_down(Key::ArrowRight)) {
-            self.center[0] += 0.01;
+            render_data.coordinate_uniform.data.center[0] += 0.01;
         }
         if ctx.input(|i| i.key_down(Key::W)) {
-            self.s *= 1.005;
+            render_data.coordinate_uniform.data.s *= 1.005;
         }
         if ctx.input(|i| i.key_down(Key::S)) {
-            self.s /= 1.005;
+            render_data.coordinate_uniform.data.s /= 1.005;
         }
     }
 }
