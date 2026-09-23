@@ -1,4 +1,12 @@
 pub mod ast;
+pub mod vm_renderer;
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct ByteCode {
+    pub data: [f32; 256],
+    pub code: [u32; 64],
+}
 
 pub fn equation_to_ast(equa: &String) {
     let equa_iter = equa.chars();

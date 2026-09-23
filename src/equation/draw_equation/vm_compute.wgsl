@@ -19,7 +19,7 @@ struct InputInstruction {
     instruction_number: u32,
     _pad0: u32, _pad1: u32, _pad2: u32,
     color: vec4<f32>,
-    instruction: array<vec4<u32>, 64>, // 256 組指令 (LOAD, LOADX, ADD ...)
+    instruction: array<vec4<u32>, 16>, // 64 組指令 (LOAD, LOADX, ADD ...)
     para: array<vec4<f32>, 64>, // 256 個參數
 }
 

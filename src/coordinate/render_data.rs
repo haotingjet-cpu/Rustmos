@@ -9,6 +9,7 @@ pub struct UniformData<T> {
 
 pub struct RenderData {
     pub coordinate_uniform: UniformData<super::CoordinateUniform>,
+    pub bytecode_uniform: UniformData<crate::equation::ByteCode>,
 }
 
 impl<T> UniformData<T> {
@@ -67,8 +68,54 @@ impl RenderData {
                 uniform_buffer,
             }
         };
+        let bytecode_uniform = {
+            let bytecode_uniform_init = crate::equation::ByteCode {
+                data: [0.0; 256],
+                code: [0; 64],
+            };
 
-        Self { coordinate_uniform }
+            let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("bytecode uniform"),
+                contents: bytemuck::cast_slice(&[bytecode_uniform_init]),
+                usage: wgpu::BufferUsages::UNIFORM,
+            });
+
+            let bindgroup_layout =
+                device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                    label: Some("bind group layout"),
+                    entries: &[wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::COMPUTE,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Uniform,
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    }],
+                });
+
+            let bindgroup = device.create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("time_bind_group"),
+                layout: &bindgroup_layout,
+                entries: &[wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: uniform_buffer.as_entire_binding(),
+                }],
+            });
+
+            UniformData {
+                data: bytecode_uniform_init,
+                bindgroup_layout,
+                bindgroup,
+                uniform_buffer,
+            }
+        };
+
+        Self {
+            coordinate_uniform,
+            bytecode_uniform,
+        }
     }
 
     pub fn write_data_to_buffer(&mut self, queue: &wgpu::Queue) {
