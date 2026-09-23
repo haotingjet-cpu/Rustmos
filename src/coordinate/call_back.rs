@@ -58,7 +58,7 @@ impl egui_wgpu::CallbackTrait for MyCallback {
             render_pass.set_bind_group(0, &render_data.coordinate_uniform.bindgroup, &[]);
 
             render_pass.set_pipeline(&renderer.pipeline);
-            render_pass.draw(0..12, 0..1);
+            render_pass.draw(0..24, 0..1);
         }
 
         Vec::new()

@@ -38,7 +38,7 @@ fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> VertexOutput {
 
     var center_y = vec2<f32>(0.0,coordinate.center[1]);
 
-    var positions = array<vec2<f32>, 12>(
+    var positions = array<vec2<f32>, 24>(
         vec2<f32>(min_x, coordinate.center[1] - width),
         vec2<f32>(max_x, coordinate.center[1] - width),
         vec2<f32>(max_x, coordinate.center[1] + width),
@@ -53,6 +53,20 @@ fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> VertexOutput {
         vec2<f32>(coordinate.center[0] - width, min_y),
         vec2<f32>(coordinate.center[0] + width, min_y),
         vec2<f32>(coordinate.center[0] + width, max_y),
+    //
+        vec2<f32>(coordinate.center[0] + width - 2.0 , max_y),
+        vec2<f32>(coordinate.center[0] - width - 2.0, max_y),
+        vec2<f32>(coordinate.center[0] - width - 2.0, min_y),
+        vec2<f32>(coordinate.center[0] - width - 2.0, min_y),
+        vec2<f32>(coordinate.center[0] + width - 2.0, min_y),
+        vec2<f32>(coordinate.center[0] + width - 2.0, max_y),
+    //
+        vec2<f32>(min_x, coordinate.center[1] - width + 2.0),
+        vec2<f32>(max_x, coordinate.center[1] - width + 2.0),
+        vec2<f32>(max_x, coordinate.center[1] + width + 2.0),
+        vec2<f32>(max_x, coordinate.center[1] + width + 2.0),
+        vec2<f32>(min_x, coordinate.center[1] + width + 2.0),
+        vec2<f32>(min_x, coordinate.center[1] - width + 2.0),
         );
 
     var colors = vec3<f32>(0.0, 0.0, 0.0);
