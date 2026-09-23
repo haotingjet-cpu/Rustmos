@@ -10,4 +10,8 @@ pub(crate) struct CoordinateUniform {
     pub(crate) transform: f32,
     pub(crate) s: f32,
     pub(crate) center: [f32; 2],
+
+    // first 16 byte
+    pub(crate) size: [f32; 2],
+    pub(crate) _pad: [u32; 2],
 }

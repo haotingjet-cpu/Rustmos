@@ -23,7 +23,6 @@ impl egui_wgpu::CallbackTrait for MyCallback {
         if let Some(wgpu_state) = callback_resources.get::<egui_wgpu::RenderState>() {
             let mut egui_renderer = wgpu_state.renderer.write();
 
-            // 執行動態縮放與更新 TextureId
             renderer.check_and_resize(
                 device,
                 &mut egui_renderer,
@@ -36,32 +35,30 @@ impl egui_wgpu::CallbackTrait for MyCallback {
                 label: Some("Eframe Offscreen MSAA Pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: &renderer.msaa_texture_view,
-                    resolve_target: Some(&renderer.resolve_texture_view), // 🚀 自動縮小
+                    resolve_target: Some(&renderer.resolve_texture_view),
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color::WHITE),
                         store: wgpu::StoreOp::Store,
                     },
                     depth_slice: None,
                 })],
-                depth_stencil_attachment: None, // 如果有深度緩衝區再補
+                depth_stencil_attachment: None,
                 occlusion_query_set: None,
                 timestamp_writes: None,
                 ..Default::default()
             });
 
-            // println!("{:?}", resources.center);
-
-            render_data.coordinate_uniform.data.transform =
-                self.target_width as f32 / self.target_height as f32;
+            {
+                let data = &mut render_data.coordinate_uniform.data;
+                data.transform = self.target_width as f32 / self.target_height as f32;
+                data.size = [self.target_width as f32, self.target_height as f32];
+            }
 
             render_data.write_data_to_buffer(queue);
-
             render_pass.set_bind_group(0, &render_data.coordinate_uniform.bindgroup, &[]);
 
-            // 畫出你的 3D 場景（Pipeline 的 count 為 4）
             render_pass.set_pipeline(&renderer.pipeline);
             render_pass.draw(0..12, 0..1);
-            // }
         }
 
         Vec::new()

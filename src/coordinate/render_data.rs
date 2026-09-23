@@ -24,6 +24,8 @@ impl RenderData {
                 transform: 1.0,
                 s: 1.0,
                 center: [0.0; 2],
+                size: [5.0, 5.0],
+                _pad: [0; 2],
             };
 
             let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
