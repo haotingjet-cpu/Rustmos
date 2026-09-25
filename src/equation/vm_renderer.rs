@@ -14,9 +14,14 @@ impl ComputeRenderer {
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("compute_pipeline_layout"),
-            bind_group_layouts: &[Some(
-                render_data.bytecode_uniform.get_ref_bindgroup_layout(),
-            )],
+            bind_group_layouts: &[
+                Some(render_data.bytecode_uniform.get_ref_bindgroup_layout()),
+                Some(
+                    render_data
+                        .equation_vertex_buffer
+                        .get_ref_bindgroup_layout(),
+                ),
+            ],
             immediate_size: 0,
         });
 

@@ -5,6 +5,7 @@ use std::sync::Arc;
 
 mod coordinate;
 mod equation;
+mod pub_const;
 mod ui;
 
 pub(crate) struct MyApp<'a> {

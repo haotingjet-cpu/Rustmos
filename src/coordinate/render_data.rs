@@ -1,22 +1,22 @@
 use wgpu::util::DeviceExt;
 
-pub struct UniformData<T> {
+pub struct BufferData<T> {
     pub data: T,
     pub bindgroup_layout: wgpu::BindGroupLayout,
     pub bindgroup: wgpu::BindGroup,
-    pub uniform_buffer: wgpu::Buffer,
+    pub buffer: wgpu::Buffer,
 }
 
 pub struct RenderData {
-    pub coordinate_uniform: UniformData<super::CoordinateUniform>,
-    pub bytecode_uniform: UniformData<(
+    pub coordinate_uniform: BufferData<super::CoordinateUniform>,
+    pub bytecode_uniform: BufferData<(
         super::CoordinateUniformForCompute,
         crate::equation::InputInstruction,
     )>,
-    pub equation_vertex_uniform: UniformData<Vec<super::vertex::Vertex>>,
+    pub equation_vertex_buffer: BufferData<[super::vertex::Vertex; crate::pub_const::VERTEX_NUM]>,
 }
 
-impl<T> UniformData<T> {
+impl<T> BufferData<T> {
     pub fn get_ref_bindgroup_layout(&self) -> &wgpu::BindGroupLayout {
         &self.bindgroup_layout
     }
@@ -65,11 +65,11 @@ impl RenderData {
                 }],
             });
 
-            UniformData {
+            BufferData {
                 data: coordinate_uniform_init,
                 bindgroup_layout,
                 bindgroup,
-                uniform_buffer,
+                buffer: uniform_buffer,
             }
         };
         let bytecode_uniform = {
@@ -133,26 +133,68 @@ impl RenderData {
                 ],
             });
 
-            UniformData {
+            BufferData {
                 data: (
                     coordinate_uniform_for_compute_init,
                     input_instruction_uniform_init,
                 ),
                 bindgroup_layout,
                 bindgroup,
-                uniform_buffer: input_instruction_uniform_buffer,
+                buffer: input_instruction_uniform_buffer,
+            }
+        };
+
+        let equation_vertex_buffer = {
+            let vertex_buffer_init = super::vertex::Vertex::init();
+            let storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("equation uniform"),
+                contents: bytemuck::cast_slice(&[vertex_buffer_init]),
+                usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::STORAGE,
+            });
+
+            let bindgroup_layout =
+                device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                    label: Some("bind group layout"),
+                    entries: &[wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::COMPUTE,
+
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Storage { read_only: false },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    }],
+                });
+
+            let bindgroup = device.create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("time_bind_group"),
+                layout: &bindgroup_layout,
+                entries: &[wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: storage_buffer.as_entire_binding(),
+                }],
+            });
+
+            BufferData {
+                data: vertex_buffer_init,
+                bindgroup,
+                bindgroup_layout,
+                buffer: storage_buffer,
             }
         };
 
         Self {
             coordinate_uniform,
             bytecode_uniform,
+            equation_vertex_buffer,
         }
     }
 
     pub fn write_data_to_buffer(&mut self, queue: &wgpu::Queue) {
         queue.write_buffer(
-            &self.coordinate_uniform.uniform_buffer,
+            &self.coordinate_uniform.buffer,
             0,
             bytemuck::cast_slice(&[self.coordinate_uniform.data]),
         );
