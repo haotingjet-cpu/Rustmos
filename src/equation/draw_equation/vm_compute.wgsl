@@ -36,7 +36,7 @@ struct Coordinate {
 
 @group(0) @binding(0) var<uniform> coordinate: Coordinate;
 @group(0) @binding(1) var<uniform> input: InputInstruction;
-@group(0) @binding(2) var<storage, read_write> output_vertices: array<Vertex>;
+@group(1) @binding(0) var<storage, read_write> output_vertices: array<Vertex>;
 
 fn vm(register_array: ptr<function, array<vec4<f32>, 8>>, target_x: f32)
 {

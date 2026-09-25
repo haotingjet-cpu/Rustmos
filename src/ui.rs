@@ -1,8 +1,8 @@
 pub(crate) mod input_box;
 pub(crate) mod theam_color;
+pub(crate) use theam_color::Color;
 
 use eframe::egui::{self, Panel};
-use theam_color::Color;
 
 pub(crate) struct InputBox<'a> {
     pub(crate) content: String,

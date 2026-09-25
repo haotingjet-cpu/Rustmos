@@ -9,7 +9,11 @@ pub struct UniformData<T> {
 
 pub struct RenderData {
     pub coordinate_uniform: UniformData<super::CoordinateUniform>,
-    pub bytecode_uniform: UniformData<crate::equation::ByteCode>,
+    pub bytecode_uniform: UniformData<(
+        super::CoordinateUniformForCompute,
+        crate::equation::InputInstruction,
+    )>,
+    pub equation_vertex_uniform: UniformData<Vec<super::vertex::Vertex>>,
 }
 
 impl<T> UniformData<T> {
@@ -69,46 +73,74 @@ impl RenderData {
             }
         };
         let bytecode_uniform = {
-            let bytecode_uniform_init = crate::equation::ByteCode {
-                data: [0.0; 256],
-                code: [0; 64],
-            };
+            let input_instruction_uniform_init = crate::equation::InputInstruction::init();
 
-            let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("bytecode uniform"),
-                contents: bytemuck::cast_slice(&[bytecode_uniform_init]),
-                usage: wgpu::BufferUsages::UNIFORM,
-            });
+            let coordinate_uniform_for_compute_init = super::CoordinateUniformForCompute::init();
+
+            let input_instruction_uniform_buffer =
+                device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("bytecode uniform"),
+                    contents: bytemuck::cast_slice(&[input_instruction_uniform_init]),
+                    usage: wgpu::BufferUsages::UNIFORM,
+                });
+
+            let coordinate_uniform_buffer =
+                device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("bytecode uniform"),
+                    contents: bytemuck::cast_slice(&[input_instruction_uniform_init]),
+                    usage: wgpu::BufferUsages::UNIFORM,
+                });
 
             let bindgroup_layout =
                 device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                     label: Some("bind group layout"),
-                    entries: &[wgpu::BindGroupLayoutEntry {
-                        binding: 0,
-                        visibility: wgpu::ShaderStages::COMPUTE,
-                        ty: wgpu::BindingType::Buffer {
-                            ty: wgpu::BufferBindingType::Uniform,
-                            has_dynamic_offset: false,
-                            min_binding_size: None,
+                    entries: &[
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 0,
+                            visibility: wgpu::ShaderStages::COMPUTE,
+                            ty: wgpu::BindingType::Buffer {
+                                ty: wgpu::BufferBindingType::Uniform,
+                                has_dynamic_offset: false,
+                                min_binding_size: None,
+                            },
+                            count: None,
                         },
-                        count: None,
-                    }],
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 1,
+                            visibility: wgpu::ShaderStages::COMPUTE,
+                            ty: wgpu::BindingType::Buffer {
+                                ty: wgpu::BufferBindingType::Uniform,
+                                has_dynamic_offset: false,
+                                min_binding_size: None,
+                            },
+                            count: None,
+                        },
+                    ],
                 });
 
             let bindgroup = device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: Some("time_bind_group"),
                 layout: &bindgroup_layout,
-                entries: &[wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: uniform_buffer.as_entire_binding(),
-                }],
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: input_instruction_uniform_buffer.as_entire_binding(),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: coordinate_uniform_buffer.as_entire_binding(),
+                    },
+                ],
             });
 
             UniformData {
-                data: bytecode_uniform_init,
+                data: (
+                    coordinate_uniform_for_compute_init,
+                    input_instruction_uniform_init,
+                ),
                 bindgroup_layout,
                 bindgroup,
-                uniform_buffer,
+                uniform_buffer: input_instruction_uniform_buffer,
             }
         };
 

@@ -27,3 +27,23 @@ impl From<Color> for egui::Color32 {
         }
     }
 }
+
+impl Color {
+    pub fn get_raw(self) -> [f32; 4] {
+        let mut c = match self {
+            Color::Red => [244.0, 67.0, 54.0, 0.0],
+            Color::LightRed => [255.0, 205.0, 210.0, 0.0],
+            Color::Blue => [33.0, 150.0, 243.0, 0.0],
+            Color::Gray => [180.0, 180.0, 180.0, 0.0],
+            Color::DarkGray => [120.0, 120.0, 120.0, 0.0],
+            Color::Purple => [156.0, 39.0, 176.0, 0.0],
+            Color::LightBlue => [25.0, 118.0, 210.0, 0.0],
+            Color::LightPurple => [225.0, 190.0, 231.0, 0.0],
+        };
+        c[0] /= 255.0;
+        c[1] /= 255.0;
+        c[2] /= 255.0;
+        c[3] /= 255.0;
+        c
+    }
+}

@@ -12,7 +12,7 @@ pub(crate) struct MyApp<'a> {
     pub(crate) deleted_func: Vec<usize>,
     is_colsed: bool,
     offscreen_renderer: Arc<Mutex<coordinate::offscreen_renderer::OffscreenRenderer>>,
-    vm_renderer: Arc<Mutex<equation::vm_renderer::ComputeRenderer>>,
+    _vm_renderer: Arc<Mutex<equation::vm_renderer::ComputeRenderer>>,
     render_data: Arc<Mutex<coordinate::render_data::RenderData>>,
 }
 
@@ -52,7 +52,7 @@ impl<'a> MyApp<'a> {
             deleted_func: Vec::new(),
             is_colsed: false,
             offscreen_renderer: Arc::new(Mutex::new(offscreen_renderer)),
-            vm_renderer: Arc::new(Mutex::new(vm_renderer)),
+            _vm_renderer: Arc::new(Mutex::new(vm_renderer)),
             render_data: Arc::new(Mutex::new(render_data)),
         }
     }
